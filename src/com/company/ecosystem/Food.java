@@ -2,17 +2,13 @@ package com.company.ecosystem;
 
 import java.util.Random;
 
-public class Food {
-    private Double[] location;
-    private Double radius;
-    private Random ran;
+public abstract class Food {
+    Double[] location;
+    Double radius;
+    Random ran;
 
-    Food(int worldWidth, int worldHeight, int foodRadius) {
+    Food () {
         ran = new Random();
-        location = new Double[2];
-        location[0] = ran.nextDouble() * worldWidth;
-        location[1] = ran.nextDouble() * worldHeight;
-        radius = foodRadius * 1.0;
     }
 
     public Double[] getLocation() {
@@ -29,5 +25,13 @@ public class Food {
 
     public void setRadius(Double radius) {
         this.radius = radius;
+    }
+
+    public Random getRan() {
+        return ran;
+    }
+
+    public void setRan(Random ran) {
+        this.ran = ran;
     }
 }

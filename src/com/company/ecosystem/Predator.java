@@ -3,19 +3,17 @@ package com.company.ecosystem;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Prey extends Agent {
-    private static final double MAX_SPEED = 15.0;
+public class Predator extends Agent {
+    private static final double STARTING_HEALTH = 250d;
+    private static final double MAX_SPEED = 30.0;
     private static final double MAX_RADIUS = 50.0;
     private static final double MAX_ACCELERATION = 1;
-    private static final double REPRODUCTION_RATE = 0.004;
+    private static final double REPRODUCTION_RATE = 0.0025;
     private static final double MUTATION_RATE = 0.15;
     private static final int REPRODUCTION_HEALTH_THRESHOLD = 50;
     private static final int REPRODUCTION_HEALTH_PENALTY = 25;
-    private static final int BASIC_FOOD_NUTRITIONAL_VALUE = 100;
-    private static final int ALTERNATE_FOOD_NUTRITIONAL_VALUE = 300;
-    private static final double ALTERNATE_FOOD_SIZE_MULTIPLIER_THRESHOLD = 4;
 
-    Prey(DNA dna_, Double x, Double y) {
+    Predator(DNA dna_, Double x, Double y) {
         ran = new Random();
         location = new Double[2];
         location[0] = x;
@@ -23,36 +21,24 @@ public class Prey extends Agent {
         speed = new Double[2];
         speed[0] = 5.0;
         speed[1] = 5.0;
-        health = 200d;
+        health = STARTING_HEALTH;
         dna = dna_;
         maxSpeed = map(dna.genes[0], 0.0, 1.0, MAX_SPEED, 0.0);
         radius = map(dna.genes[0], 0.0, 1.0, 0.0, MAX_RADIUS);
     }
 
-    void eatBasic(ArrayList<BasicFood> basicFoodList) {
-        for (int i = basicFoodList.size()-1; i >= 0; i--) {
-            Double[] foodLocation = basicFoodList.get(i).getLocation();
+    void eat(ArrayList<Prey> preyList) {
+        for (int i = preyList.size()-1; i >= 0; i--) {
+            Double[] foodLocation = preyList.get(i).getLocation();
             Double d = distance(location, foodLocation);
-            if (d < radius + basicFoodList.get(i).getRadius()) {
-                health += BASIC_FOOD_NUTRITIONAL_VALUE;
-                basicFoodList.remove(i);
+            if (d < radius && preyList.get(i).getRadius() < radius) {
+                health += 200;
+                preyList.remove(i);
             }
         }
     }
 
-    void eatAlternate(ArrayList<AlternateFood> alternateFoodList) {
-        for (int i = alternateFoodList.size()-1; i >= 0; i--) {
-            Double[] foodLocation = alternateFoodList.get(i).getLocation();
-            Double d = distance(location, foodLocation);
-            if (d < radius + alternateFoodList.get(i).getRadius()
-                    && radius < alternateFoodList.get(i).getRadius() * ALTERNATE_FOOD_SIZE_MULTIPLIER_THRESHOLD) {
-                health += ALTERNATE_FOOD_NUTRITIONAL_VALUE;
-                alternateFoodList.remove(i);
-            }
-        }
-    }
-
-    Prey reproduce() {
+    Predator reproduce() {
         if (ran.nextDouble() < REPRODUCTION_RATE && health > REPRODUCTION_HEALTH_THRESHOLD) {
             DNA childDNA = dna.copy();
             health -= REPRODUCTION_HEALTH_PENALTY;
@@ -61,7 +47,7 @@ public class Prey extends Agent {
             if (ran.nextDouble() < MUTATION_RATE) {
                 childDNA = new DNA();
             }
-            return new Prey(childDNA, location[0], location[1]);
+            return new Predator(childDNA, location[0], location[1]);
         } else {
             return null;
         }
@@ -80,7 +66,7 @@ public class Prey extends Agent {
             speed[1] = speed[1] * maxSpeed / currentSpeed;
         }
 
-        // Updated the Prey instance location based on the speed
+        // Updated the Predator instance location based on the speed
         Double dx = speed[0];
         Double dy = speed[1];
         location[0] += dx;
