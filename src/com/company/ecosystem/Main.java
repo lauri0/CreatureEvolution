@@ -304,7 +304,7 @@ public class Main extends JPanel{
                     iterator.remove();
                 }
 
-                Prey child = prey.reproduce();
+                Prey child = prey.reproduce(currentPreyReproductionRate, currentPreyMutationRate);
                 if (child != null) {
                     bornPreyList.add(child);
                 }
@@ -321,7 +321,7 @@ public class Main extends JPanel{
                     iterator.remove();
                 }
 
-                Predator child = predator.reproduce();
+                Predator child = predator.reproduce(currentPredatorReproductionRate, currentPredatorMutationRate);
                 if (child != null) {
                     bornPredatorList.add(child);
                 }
@@ -353,22 +353,25 @@ public class Main extends JPanel{
 
     private class ButtonClickListener implements ActionListener{
         public Boolean validInput(){
-            double basicSpawn;
-            double altSpawn;
+            ArrayList<Double> doubleValues = new ArrayList<>();
 
             try{
-                basicSpawn = Double.parseDouble(basicFoodSpawnInput.getText());
-                altSpawn = Double.parseDouble(altFoodSpawnInput.getText());
+                doubleValues.add(Double.parseDouble(basicFoodSpawnInput.getText()));
+                doubleValues.add(Double.parseDouble(altFoodSpawnInput.getText()));
+                doubleValues.add(Double.parseDouble(predatorReprRateInput.getText()));
+                doubleValues.add(Double.parseDouble(preyReprRateInput.getText()));
+                doubleValues.add(Double.parseDouble(predatorMutationRateInput.getText()));
+                doubleValues.add(Double.parseDouble(preyMutationRateInput.getText()));
             } catch(Exception e){
                 return false;
             }
 
-            if(1 < basicSpawn || basicSpawn < 0){
-                return false;
+            for(Double value : doubleValues){
+                if(1 < value || value < 0){
+                    return false;
+                }
             }
-            if(1 < altSpawn || altSpawn < 0){
-                return false;
-            }
+
             System.out.println("Valid input.");
             return true;
         }
@@ -378,13 +381,26 @@ public class Main extends JPanel{
                 if(validInput()){
                     currentBasicFoodSpawnRate = Double.parseDouble(basicFoodSpawnInput.getText());
                     currentAltFoodSpawnRate = Double.parseDouble(altFoodSpawnInput.getText());
+                    currentPredatorReproductionRate = Double.parseDouble(predatorReprRateInput.getText());
+                    currentPreyReproductionRate = Double.parseDouble(preyReprRateInput.getText());
+                    currentPredatorMutationRate = Double.parseDouble(predatorMutationRateInput.getText());
+                    currentPreyMutationRate = Double.parseDouble(preyMutationRateInput.getText());
                     System.out.println("Changed parameters.");
                 }
             } else if(e.getActionCommand().equals(RESET_DEFAULTS_ACTION_COMMAND)){
                 currentBasicFoodSpawnRate = BASIC_FOOD_SPAWN_RATE;
                 currentAltFoodSpawnRate = ALTERNATE_FOOD_SPAWN_RATE;
+                currentPredatorReproductionRate = PREDATOR_REPRODUCTION_RATE;
+                currentPreyReproductionRate = PREY_REPRODUCTION_RATE;
+                currentPredatorMutationRate = PREDATOR_MUTATION_RATE;
+                currentPreyMutationRate = PREY_MUTATION_RATE;
+
                 basicFoodSpawnInput.setText(Double.toString(currentBasicFoodSpawnRate));
                 altFoodSpawnInput.setText(Double.toString(currentAltFoodSpawnRate));
+                predatorReprRateInput.setText(Double.toString(currentPredatorReproductionRate));
+                preyReprRateInput.setText(Double.toString(currentPreyReproductionRate));
+                predatorMutationRateInput.setText(Double.toString(currentPredatorMutationRate));
+                preyMutationRateInput.setText(Double.toString(currentPreyMutationRate));
                 System.out.println("Reset parameters");
             }
         }

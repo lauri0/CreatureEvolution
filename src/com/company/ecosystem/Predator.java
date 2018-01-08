@@ -8,8 +8,8 @@ public class Predator extends Agent {
     private static final double MAX_SPEED = 30.0;
     private static final double MAX_RADIUS = 50.0;
     private static final double MAX_ACCELERATION = 1;
-    private static final double REPRODUCTION_RATE = 0.0025;
-    private static final double MUTATION_RATE = 0.15;
+    //private static final double REPRODUCTION_RATE = 0.0025;
+    //private static final double MUTATION_RATE = 0.15;
     private static final int REPRODUCTION_HEALTH_THRESHOLD = 50;
     private static final int REPRODUCTION_HEALTH_PENALTY = 25;
 
@@ -38,13 +38,13 @@ public class Predator extends Agent {
         }
     }
 
-    Predator reproduce() {
-        if (ran.nextDouble() < REPRODUCTION_RATE && health > REPRODUCTION_HEALTH_THRESHOLD) {
+    Predator reproduce(Double reproductionRate, Double mutationRate) {
+        if (ran.nextDouble() < reproductionRate && health > REPRODUCTION_HEALTH_THRESHOLD) {
             DNA childDNA = dna.copy();
             health -= REPRODUCTION_HEALTH_PENALTY;
 
             // There is a probability for a mutation to occur
-            if (ran.nextDouble() < MUTATION_RATE) {
+            if (ran.nextDouble() < mutationRate) {
                 childDNA = new DNA();
             }
             return new Predator(childDNA, location[0], location[1]);
