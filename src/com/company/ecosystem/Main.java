@@ -1,8 +1,17 @@
 package com.company.ecosystem;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.Timer;
 
@@ -33,6 +42,7 @@ public class Main extends JPanel{
     private static final String PREY_STR = "Prey animals";
     private static final String UPDATE_ACTION_COMMAND = "Update";
     private static final String RESET_DEFAULTS_ACTION_COMMAND = "Defaults";
+    private static final String LOG_ACTION_COMMAND = "Log";
     private static final double PREDATOR_REPRODUCTION_RATE = 0.0025;
     private static final double PREY_REPRODUCTION_RATE = 0.004;
     private static final double PREDATOR_MUTATION_RATE = 0.15;
@@ -46,7 +56,10 @@ public class Main extends JPanel{
     private ArrayList<BasicFood> basicFoodList;
     private ArrayList<AlternateFood> alternateFoodList;
     private ArrayList<Predator> predatorList;
+    private ArrayList<String> creatureCountList;
+    private ArrayList<String> foodCountList;
     private Random ran;
+    private int framenr;
 
     private JPanel controlPanel;
     private JPanel countPanel;
@@ -77,6 +90,7 @@ public class Main extends JPanel{
 
     private JButton updateButton;
     private JButton defaultButton;
+    private JButton creatureCountButton;
 
     private double currentBasicFoodSpawnRate;
     private double currentAltFoodSpawnRate;
@@ -92,6 +106,9 @@ public class Main extends JPanel{
         basicFoodList = new ArrayList<>();
         alternateFoodList = new ArrayList<>();
         predatorList = new ArrayList<>();
+        creatureCountList = new ArrayList<>();
+        foodCountList = new ArrayList<>();
+        framenr = 0;
 
         currentBasicFoodSpawnRate = BASIC_FOOD_SPAWN_RATE;
         currentAltFoodSpawnRate = ALTERNATE_FOOD_SPAWN_RATE;
@@ -216,6 +233,9 @@ public class Main extends JPanel{
         defaultButton = new JButton("Reset to defaults");
         defaultButton.setActionCommand(RESET_DEFAULTS_ACTION_COMMAND);
         defaultButton.addActionListener(listener);
+        creatureCountButton = new JButton("Log creature count");
+        creatureCountButton.setActionCommand(LOG_ACTION_COMMAND);
+        creatureCountButton.addActionListener(listener);
 
         inputPanel.add(basicFoodSpawnPanel);
         inputPanel.add(altFoodSpawnPanel);
@@ -225,6 +245,7 @@ public class Main extends JPanel{
         inputPanel.add(preyMutationRatePanel);
         inputPanel.add(updateButton);
         inputPanel.add(defaultButton);
+        inputPanel.add(creatureCountButton);
 
         controlPanel.add(countPanel);
         controlPanel.add(inputPanel);
@@ -338,6 +359,9 @@ public class Main extends JPanel{
             }
 
             repaint();
+            creatureCountList.add(Integer.toString(framenr) + "\t" + Integer.toString(preyList.size()) + "\t" + Integer.toString(predatorList.size()));
+            foodCountList.add(Integer.toString(framenr) + "\t" + Integer.toString(basicFoodList.size()) + "\t" + Integer.toString(alternateFoodList.size()));
+            framenr += 1;
         }
     }
 
@@ -403,6 +427,35 @@ public class Main extends JPanel{
                 predatorMutationRateInput.setText(Double.toString(currentPredatorMutationRate));
                 preyMutationRateInput.setText(Double.toString(currentPreyMutationRate));
                 System.out.println("Reset parameters");
+            }
+            else if(e.getActionCommand().equals(LOG_ACTION_COMMAND)){
+			Path creatureFile = Paths.get("logs/creatureCount.dat");
+			Path foodFile = Paths.get("logs/foodCount.dat");
+			File f = new File("logs/creatureCount.dat");
+			File g = new File("logs/foodCount.dat");
+			try {
+				if(f.exists() && !f.isDirectory()){
+					Files.write(creatureFile, creatureCountList, Charset.forName("UTF-8"), StandardOpenOption.APPEND);
+				}
+				else{
+					Files.write(creatureFile, creatureCountList, Charset.forName("UTF-8"));
+				}
+				if(g.exists() && !g.isDirectory()){
+					Files.write(foodFile, foodCountList, Charset.forName("UTF-8"), StandardOpenOption.APPEND);
+				}
+				else{
+					Files.write(foodFile, foodCountList, Charset.forName("UTF-8"));
+				}
+				
+				creatureCountList = new ArrayList<>();
+				foodCountList = new ArrayList<>();
+				
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		            
+
+            	
             }
         }
     }
