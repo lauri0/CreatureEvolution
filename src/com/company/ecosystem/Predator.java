@@ -5,13 +5,16 @@ import java.util.Random;
 
 public class Predator extends Agent {
     private static final double STARTING_HEALTH = 250d;
-    private static final double MAX_SPEED = 30.0;
+    private static final double MAX_SPEED = 5.0;
     private static final double MAX_RADIUS = 50.0;
-    private static final double MAX_ACCELERATION = 1;
+    private static final double MAX_ACCELERATION = 2;
     private static final double REPRODUCTION_RATE = 0.0025;
     private static final double MUTATION_RATE = 0.15;
     private static final int REPRODUCTION_HEALTH_THRESHOLD = 50;
     private static final int REPRODUCTION_HEALTH_PENALTY = 25;
+    private static final double MAX_HEALTH = 1000.0;
+
+    private Double attractionToPrey;
 
     Predator(DNA dna_, Double x, Double y) {
         ran = new Random();
@@ -19,12 +22,14 @@ public class Predator extends Agent {
         location[0] = x;
         location[1] = y;
         speed = new Double[2];
-        speed[0] = 5.0;
-        speed[1] = 5.0;
+        speed[0] = -2.5 + 5 * ran.nextDouble();
+        speed[1] = -2.5 + 5 * ran.nextDouble();
         health = STARTING_HEALTH;
         dna = dna_;
         maxSpeed = map(dna.genes[0], 0.0, 1.0, MAX_SPEED, 0.0);
+        maxAcceleration = MAX_ACCELERATION;
         radius = map(dna.genes[0], 0.0, 1.0, 0.0, MAX_RADIUS);
+        attractionToPrey = map(dna.genes[1], 0.0, 1.0, -1.0, 1.0);
     }
 
     void eat(ArrayList<Prey> preyList) {
@@ -33,6 +38,9 @@ public class Predator extends Agent {
             Double d = distance(location, foodLocation);
             if (d < radius && preyList.get(i).getRadius() < radius) {
                 health += 200;
+                if (health > MAX_HEALTH) {
+                    health = MAX_HEALTH;
+                }
                 preyList.remove(i);
             }
         }
@@ -45,7 +53,7 @@ public class Predator extends Agent {
 
             // There is a probability for a mutation to occur
             if (ran.nextDouble() < MUTATION_RATE) {
-                childDNA = new DNA();
+                childDNA.mutate(ran);
             }
             return new Predator(childDNA, location[0], location[1]);
         } else {
@@ -53,7 +61,33 @@ public class Predator extends Agent {
         }
     }
 
-    void update(int worldWidth, int worldHeight) {
+    void moveRelativeToClosestPrey(ArrayList<Prey> agents, int worldWidth, int worldHeight) {
+        Double closestDistance = 1000000.0;
+        Double closestAgentXCoord = 1000000.0;
+        Double closestAgentYCoord = 1000000.0;
+        for (Agent agent : agents) {
+            Double[] otherLocation = agent.getLocation();
+            Double dist = distance(location, otherLocation);
+            if (dist < closestDistance && agent.getRadius() < radius) {
+                closestDistance = dist;
+                closestAgentXCoord = agent.getLocation()[0];
+                closestAgentYCoord = agent.getLocation()[1];
+            }
+        }
+        if (closestDistance < 100000.0) {
+            Double[] targetLocation = {closestAgentXCoord, closestAgentYCoord};
+            Double modifier = attractionToPrey;
+            accelerate(targetLocation, modifier);
+            move(worldWidth, worldHeight);
+        }
+        else {
+            decelerate();
+            move(worldWidth, worldHeight);
+        }
+    }
+
+    void update(ArrayList<Prey> preyList, int worldWidth, int worldHeight) {
+        /*
         Double dvx = map(ran.nextDouble(), 0.0, 1.0, -MAX_ACCELERATION, MAX_ACCELERATION);
         Double dvy = map(ran.nextDouble(), 0.0, 1.0, -MAX_ACCELERATION, MAX_ACCELERATION);
         speed[0] += dvx;
@@ -83,7 +117,8 @@ public class Predator extends Agent {
         }
         else if (location[1] < 0) {
             location[1] = worldHeight - location[1];
-        }
+        }*/
+        moveRelativeToClosestPrey(preyList, worldWidth, worldHeight);
 
         health -= 1;
     }

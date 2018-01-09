@@ -4,16 +4,19 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Prey extends Agent {
-    private static final double MAX_SPEED = 15.0;
+    private static final double MAX_SPEED = 10.0;
     private static final double MAX_RADIUS = 50.0;
-    private static final double MAX_ACCELERATION = 1;
-    private static final double REPRODUCTION_RATE = 0.004;
+    private static final double MAX_ACCELERATION = 2;
+    private static final double REPRODUCTION_RATE = 0.005;
     private static final double MUTATION_RATE = 0.15;
     private static final int REPRODUCTION_HEALTH_THRESHOLD = 50;
     private static final int REPRODUCTION_HEALTH_PENALTY = 25;
     private static final int BASIC_FOOD_NUTRITIONAL_VALUE = 100;
     private static final int ALTERNATE_FOOD_NUTRITIONAL_VALUE = 300;
     private static final double ALTERNATE_FOOD_SIZE_MULTIPLIER_THRESHOLD = 4;
+    private static final double MAX_HEALTH = 500;
+
+    private Double attractionToFood;
 
     Prey(DNA dna_, Double x, Double y) {
         ran = new Random();
@@ -21,12 +24,14 @@ public class Prey extends Agent {
         location[0] = x;
         location[1] = y;
         speed = new Double[2];
-        speed[0] = 5.0;
-        speed[1] = 5.0;
+        speed[0] = -2.5 + 5 * ran.nextDouble();
+        speed[1] = -2.5 + 5 * ran.nextDouble();
         health = 200d;
         dna = dna_;
         maxSpeed = map(dna.genes[0], 0.0, 1.0, MAX_SPEED, 0.0);
+        maxAcceleration = MAX_ACCELERATION;
         radius = map(dna.genes[0], 0.0, 1.0, 0.0, MAX_RADIUS);
+        attractionToFood = map(dna.genes[1], 0.0, 1.0, -1.0, 1.0);
     }
 
     void eatBasic(ArrayList<BasicFood> basicFoodList) {
@@ -35,6 +40,9 @@ public class Prey extends Agent {
             Double d = distance(location, foodLocation);
             if (d < radius + basicFoodList.get(i).getRadius()) {
                 health += BASIC_FOOD_NUTRITIONAL_VALUE;
+                if (health > MAX_HEALTH) {
+                    health = MAX_HEALTH;
+                }
                 basicFoodList.remove(i);
             }
         }
@@ -59,7 +67,7 @@ public class Prey extends Agent {
 
             // There is a probability for a mutation to occur
             if (ran.nextDouble() < MUTATION_RATE) {
-                childDNA = new DNA();
+                childDNA.mutate(ran);
             }
             return new Prey(childDNA, location[0], location[1]);
         } else {
@@ -67,37 +75,33 @@ public class Prey extends Agent {
         }
     }
 
-    void update(int worldWidth, int worldHeight) {
-        Double dvx = map(ran.nextDouble(), 0.0, 1.0, -MAX_ACCELERATION, MAX_ACCELERATION);
-        Double dvy = map(ran.nextDouble(), 0.0, 1.0, -MAX_ACCELERATION, MAX_ACCELERATION);
-        speed[0] += dvx;
-        speed[1] += dvy;
+    void moveRelativeToClosestFood(ArrayList<BasicFood> foodList, int worldWidth, int worldHeight) {
+        Double closestDistance = 1000000.0;
+        Double closestFoodXCoord = 1000000.0;
+        Double closestFoodYCoord = 1000000.0;
+        for (Food food : foodList) {
+            Double[] otherLocation = food.getLocation();
+            Double dist = distance(location, otherLocation);
+            if (dist < closestDistance && food.getRadius() < radius) {
+                closestDistance = dist;
+                closestFoodXCoord = food.getLocation()[0];
+                closestFoodYCoord = food.getLocation()[1];
+            }
+        }
+        if (closestDistance < 1000000.0) {
+            // Choose a target location opposite to where the closest Predator is
+            Double[] targetLocation = {closestFoodXCoord * 1, closestFoodYCoord * 1};
+            Double modifier = attractionToFood;
+            accelerate(targetLocation, modifier);
+            move(worldWidth, worldHeight);
+        }
+        else {
+            moveRandomly(worldWidth, worldHeight, MAX_ACCELERATION);
+        }
+    }
 
-        // Enforce maximum speed
-        Double currentSpeed = Math.sqrt(Math.pow(speed[0], 2) + Math.pow(speed[1], 2));
-        if (currentSpeed > maxSpeed) {
-            speed[0] = speed[0] * maxSpeed / currentSpeed;
-            speed[1] = speed[1] * maxSpeed / currentSpeed;
-        }
-
-        // Updated the Prey instance location based on the speed
-        Double dx = speed[0];
-        Double dy = speed[1];
-        location[0] += dx;
-        location[1] += dy;
-
-        if (location[0] > worldWidth || location[0] < 0) {
-            location[0] = location[0] - worldWidth;
-        }
-        else if (location[0] < 0) {
-            location[0] = worldWidth - location[0];
-        }
-        else if (location[1] > worldHeight) {
-            location[1] = location[1] - worldHeight;
-        }
-        else if (location[1] < 0) {
-            location[1] = worldHeight - location[1];
-        }
+    void update(ArrayList<BasicFood> foodList, int worldWidth, int worldHeight) {
+        moveRelativeToClosestFood(foodList, worldWidth, worldHeight);
 
         health -= 1;
     }

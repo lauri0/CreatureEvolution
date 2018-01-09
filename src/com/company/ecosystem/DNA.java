@@ -9,7 +9,7 @@ public class DNA {
 
     DNA() {
         ran = new Random();
-        genes = new Double[1];
+        genes = new Double[2];
         for (int i = 0; i < genes.length; i++) {
             genes[i] = ran.nextDouble();
         }
@@ -22,5 +22,26 @@ public class DNA {
     DNA copy() {
         Double[] newGenes = Arrays.copyOf(genes, genes.length);
         return new DNA(newGenes);
+    }
+
+    void mutate(Random r) {
+        int geneIndex = r.nextInt(genes.length);
+        genes[geneIndex] = r.nextDouble();
+    }
+
+    public Double[] getGenes() {
+        return genes;
+    }
+
+    public void setGenes(Double[] genes) {
+        this.genes = genes;
+    }
+
+    public Random getRan() {
+        return ran;
+    }
+
+    public void setRan(Random ran) {
+        this.ran = ran;
     }
 }
