@@ -22,7 +22,7 @@ public class Main extends JPanel{
     private static final int BASIC_FOOD_RADIUS = 5;
     private static final int ALTERNATE_FOOD_RADIUS = 5;
     private static final double BASIC_FOOD_SPAWN_RATE = 0.2;
-    private static final double ALTERNATE_FOOD_SPAWN_RATE = 0.10;
+    private static final double ALTERNATE_FOOD_SPAWN_RATE = 0.0;
     private static final Color BASIC_FOOD_COLOR = Color.GREEN;
     private static final Color ALTERNATE_FOOD_COLOR = Color.GRAY;
     private static final Color PREY_COLOR = Color.BLUE;
@@ -299,7 +299,7 @@ public class Main extends JPanel{
                 prey.update(basicFoodList, WORLD_WIDTH, WORLD_HEIGHT);
 
                 prey.eatBasic(basicFoodList);
-                //prey.eatAlternate(alternateFoodList);
+                prey.eatAlternate(alternateFoodList);
                 if (prey.isDead()) {
                     iterator.remove();
                 }
@@ -333,9 +333,9 @@ public class Main extends JPanel{
                 basicFoodList.add(new BasicFood(WORLD_WIDTH, WORLD_HEIGHT, BASIC_FOOD_RADIUS));
             }
 
-            /*if (randomDouble < currentAltFoodSpawnRate) {
+            if (randomDouble < currentAltFoodSpawnRate) {
                 alternateFoodList.add(new AlternateFood(WORLD_WIDTH, WORLD_HEIGHT, ALTERNATE_FOOD_RADIUS));
-            }*/
+            }
 
             repaint();
         }
