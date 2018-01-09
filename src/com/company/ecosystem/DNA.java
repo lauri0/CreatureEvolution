@@ -9,7 +9,7 @@ public class DNA {
 
     DNA() {
         ran = new Random();
-        genes = new Double[2];
+        genes = new Double[3];
         for (int i = 0; i < genes.length; i++) {
             genes[i] = ran.nextDouble();
         }

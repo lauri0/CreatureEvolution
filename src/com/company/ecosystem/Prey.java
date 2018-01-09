@@ -6,7 +6,7 @@ import java.util.Random;
 public class Prey extends Agent {
     private static final double MAX_SPEED = 10.0;
     private static final double MAX_RADIUS = 50.0;
-    private static final int PREDATOR_ALERT_RANGE = 150;
+    private static final int PREDATOR_ALERT_RANGE = 100;
     private static final double MAX_ACCELERATION = 2;
     //private static final double REPRODUCTION_RATE = 0.004;
     //private static final double MUTATION_RATE = 0.15;
@@ -16,9 +16,10 @@ public class Prey extends Agent {
     private static final int ALTERNATE_FOOD_NUTRITIONAL_VALUE = 300;
     private static final double ALTERNATE_FOOD_SIZE_MULTIPLIER_THRESHOLD = 4;
     private static final double MAX_HEALTH = 500;
-    private static final double fearOfPredators = 0.5;
+    //private static final double fearOfPredators = 0.5;
 
     private Double attractionToFood;
+    private Double fearOfPredators;
 
     Prey(DNA dna_, Double x, Double y) {
         ran = new Random();
@@ -34,6 +35,8 @@ public class Prey extends Agent {
         maxAcceleration = MAX_ACCELERATION;
         radius = map(dna.genes[0], 0.0, 1.0, 0.0, MAX_RADIUS);
         attractionToFood = map(dna.genes[1], 0.0, 1.0, -1.0, 1.0);
+        fearOfPredators = map(dna.genes[2], 0.0, 1.0, -1.0, 1.0);
+        System.out.println(fearOfPredators);
     }
 
     void eatBasic(ArrayList<BasicFood> basicFoodList) {
@@ -79,8 +82,9 @@ public class Prey extends Agent {
 
     Double[] normalizedVectorBetweenPoints(Double[] point1, Double[] point2){
         Double dist = distance(point1, point2);
-        Double vx = (point1[0] - point2[0])/dist;
-        Double vy = (point1[1] - point2[1])/dist;
+        Double vx = (point2[0] - point1[0])/dist;
+        Double vy = (point2[1] - point1[1])/dist;
+
         return new Double[]{vx, vy};
     }
 
@@ -96,16 +100,17 @@ public class Prey extends Agent {
             //System.out.println("Predators near: " + nearPredators.size());
             Double[][] predatorVectors = new Double[nearPredators.size()][2];
             for(int i = 0; i<nearPredators.size(); i++){
-                predatorVectors[i] = normalizedVectorBetweenPoints(nearPredators.get(i).getLocation(), location);
+                predatorVectors[i] = normalizedVectorBetweenPoints(location, nearPredators.get(i).getLocation());
             }
+
             Double[] vectorSum = new Double[]{0.0, 0.0};
             for(Double[] v : predatorVectors){
-                //System.out.println(v);
                 vectorSum[0] += v[0];
                 vectorSum[1] += v[1];
             }
-            Double[] finalVector = normalizedVectorBetweenPoints(vectorSum, new Double[]{0.0, 0.0});
-            Double[] targetLocation = new Double[]{-1*finalVector[0]*100, -1*finalVector[1]*100};
+
+            Double[] finalVector = normalizedVectorBetweenPoints(new Double[]{0.0, 0.0}, vectorSum);
+            Double[] targetLocation = new Double[]{location[0] + -1*finalVector[0]*100, location[1] + -1*finalVector[1]*100};
             accelerate(targetLocation, fearOfPredators);
             move(worldWidth, worldHeight);
         }
