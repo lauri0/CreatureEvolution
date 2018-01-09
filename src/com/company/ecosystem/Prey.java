@@ -6,9 +6,10 @@ import java.util.Random;
 public class Prey extends Agent {
     private static final double MAX_SPEED = 10.0;
     private static final double MAX_RADIUS = 50.0;
+
     private static final double MAX_ACCELERATION = 2;
-    private static final double REPRODUCTION_RATE = 0.005;
-    private static final double MUTATION_RATE = 0.15;
+    //private static final double REPRODUCTION_RATE = 0.004;
+    //private static final double MUTATION_RATE = 0.15;
     private static final int REPRODUCTION_HEALTH_THRESHOLD = 50;
     private static final int REPRODUCTION_HEALTH_PENALTY = 25;
     private static final int BASIC_FOOD_NUTRITIONAL_VALUE = 100;
@@ -60,14 +61,14 @@ public class Prey extends Agent {
         }
     }
 
-    Prey reproduce() {
-        if (ran.nextDouble() < REPRODUCTION_RATE && health > REPRODUCTION_HEALTH_THRESHOLD) {
+    Prey reproduce(Double reproductionRate, Double mutationRate) {
+        if (ran.nextDouble() < reproductionRate && health > REPRODUCTION_HEALTH_THRESHOLD) {
             DNA childDNA = dna.copy();
             health -= REPRODUCTION_HEALTH_PENALTY;
 
             // There is a probability for a mutation to occur
-            if (ran.nextDouble() < MUTATION_RATE) {
-                childDNA.mutate(ran);
+            if (ran.nextDouble() < mutationRate) {
+                childDNA = new DNA();
             }
             return new Prey(childDNA, location[0], location[1]);
         } else {
