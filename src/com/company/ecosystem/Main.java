@@ -33,6 +33,7 @@ public class Main extends JPanel{
     private static final String PREY_STR = "Prey animals";
     private static final String UPDATE_ACTION_COMMAND = "Update";
     private static final String RESET_DEFAULTS_ACTION_COMMAND = "Defaults";
+    private static final String RESTART_SIMULATION_ACTION_COMMAND = "Restart";
     private static final double PREDATOR_REPRODUCTION_RATE = 0.0025;
     private static final double PREY_REPRODUCTION_RATE = 0.004;
     private static final double PREDATOR_MUTATION_RATE = 0.15;
@@ -77,6 +78,7 @@ public class Main extends JPanel{
 
     private JButton updateButton;
     private JButton defaultButton;
+    private JButton restartButton;
 
     private double currentBasicFoodSpawnRate;
     private double currentAltFoodSpawnRate;
@@ -165,7 +167,7 @@ public class Main extends JPanel{
         inputPanel = new JPanel();
         inputPanel.setLayout(new FlowLayout(FlowLayout.LEADING));
         inputPanel.setAlignmentX(LEFT_ALIGNMENT);
-        inputPanel.setMaximumSize(new Dimension(250, 300));
+        inputPanel.setMaximumSize(new Dimension(250, 350));
 
         basicFoodSpawnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         basicFoodSpawnInput = new JTextField(Double.toString(BASIC_FOOD_SPAWN_RATE));
@@ -216,6 +218,9 @@ public class Main extends JPanel{
         defaultButton = new JButton("Reset to defaults");
         defaultButton.setActionCommand(RESET_DEFAULTS_ACTION_COMMAND);
         defaultButton.addActionListener(listener);
+        restartButton = new JButton("Restart simulation");
+        restartButton.setActionCommand(RESTART_SIMULATION_ACTION_COMMAND);
+        restartButton.addActionListener(listener);
 
         inputPanel.add(basicFoodSpawnPanel);
         inputPanel.add(altFoodSpawnPanel);
@@ -225,6 +230,7 @@ public class Main extends JPanel{
         inputPanel.add(preyMutationRatePanel);
         inputPanel.add(updateButton);
         inputPanel.add(defaultButton);
+        inputPanel.add(restartButton);
 
         controlPanel.add(countPanel);
         controlPanel.add(inputPanel);
@@ -296,7 +302,7 @@ public class Main extends JPanel{
             ArrayList<Prey> bornPreyList = new ArrayList<>();
             for (Iterator<Prey> iterator = preyList.iterator() ; iterator.hasNext(); ) {
                 Prey prey = iterator.next();
-                prey.update(basicFoodList, WORLD_WIDTH, WORLD_HEIGHT);
+                prey.update(basicFoodList, predatorList, WORLD_WIDTH, WORLD_HEIGHT);
 
                 prey.eatBasic(basicFoodList);
                 prey.eatAlternate(alternateFoodList);
@@ -403,6 +409,14 @@ public class Main extends JPanel{
                 predatorMutationRateInput.setText(Double.toString(currentPredatorMutationRate));
                 preyMutationRateInput.setText(Double.toString(currentPreyMutationRate));
                 System.out.println("Reset parameters");
+            } else if(e.getActionCommand().equals(RESTART_SIMULATION_ACTION_COMMAND)){
+                predatorList.clear();
+                preyList.clear();
+                basicFoodList.clear();
+                alternateFoodList.clear();
+                initializeFood();
+                initializePredators();
+                initializePrey();
             }
         }
     }

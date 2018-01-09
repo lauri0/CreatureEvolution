@@ -43,11 +43,11 @@ public class Agent {
         speed[1] = speed[1] * 0.95;
         if (speed[0] < 0.4 && speed[0] > 0.0) {
             speed[0] = 0.0;
-            System.out.println("vx = 0");
+            //System.out.println("vx = 0");
         }
         if (speed[1] < 0.4 && speed[1] > 0.0) {
             speed[1] = 0.0;
-            System.out.println("vy = 0");
+            //System.out.println("vy = 0");
         }
     }
 

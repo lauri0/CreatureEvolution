@@ -6,7 +6,7 @@ import java.util.Random;
 public class Prey extends Agent {
     private static final double MAX_SPEED = 10.0;
     private static final double MAX_RADIUS = 50.0;
-
+    private static final int PREDATOR_ALERT_RANGE = 150;
     private static final double MAX_ACCELERATION = 2;
     //private static final double REPRODUCTION_RATE = 0.004;
     //private static final double MUTATION_RATE = 0.15;
@@ -16,6 +16,7 @@ public class Prey extends Agent {
     private static final int ALTERNATE_FOOD_NUTRITIONAL_VALUE = 300;
     private static final double ALTERNATE_FOOD_SIZE_MULTIPLIER_THRESHOLD = 4;
     private static final double MAX_HEALTH = 500;
+    private static final double fearOfPredators = 0.5;
 
     private Double attractionToFood;
 
@@ -76,33 +77,68 @@ public class Prey extends Agent {
         }
     }
 
-    void moveRelativeToClosestFood(ArrayList<BasicFood> foodList, int worldWidth, int worldHeight) {
-        Double closestDistance = 1000000.0;
-        Double closestFoodXCoord = 1000000.0;
-        Double closestFoodYCoord = 1000000.0;
-        for (Food food : foodList) {
-            Double[] otherLocation = food.getLocation();
-            Double dist = distance(location, otherLocation);
-            if (dist < closestDistance && food.getRadius() < radius) {
-                closestDistance = dist;
-                closestFoodXCoord = food.getLocation()[0];
-                closestFoodYCoord = food.getLocation()[1];
+    Double[] normalizedVectorBetweenPoints(Double[] point1, Double[] point2){
+        Double dist = distance(point1, point2);
+        Double vx = (point1[0] - point2[0])/dist;
+        Double vy = (point1[1] - point2[1])/dist;
+        return new Double[]{vx, vy};
+    }
+
+    void moveAccordingToSituation(ArrayList<BasicFood> foodList, ArrayList<Predator> predatorList, int worldWidth, int worldHeight) {
+        ArrayList<Predator> nearPredators = new ArrayList<>();
+        for(Predator p : predatorList){
+            if(distance(p.getLocation(), location) < PREDATOR_ALERT_RANGE && radius < p.getRadius() ){
+                nearPredators.add(p);
             }
         }
-        if (closestDistance < 1000000.0) {
-            // Choose a target location opposite to where the closest Predator is
-            Double[] targetLocation = {closestFoodXCoord * 1, closestFoodYCoord * 1};
-            Double modifier = attractionToFood;
-            accelerate(targetLocation, modifier);
+
+        if(!nearPredators.isEmpty()){
+            //System.out.println("Predators near: " + nearPredators.size());
+            Double[][] predatorVectors = new Double[nearPredators.size()][2];
+            for(int i = 0; i<nearPredators.size(); i++){
+                predatorVectors[i] = normalizedVectorBetweenPoints(nearPredators.get(i).getLocation(), location);
+            }
+            Double[] vectorSum = new Double[]{0.0, 0.0};
+            for(Double[] v : predatorVectors){
+                //System.out.println(v);
+                vectorSum[0] += v[0];
+                vectorSum[1] += v[1];
+            }
+            Double[] finalVector = normalizedVectorBetweenPoints(vectorSum, new Double[]{0.0, 0.0});
+            Double[] targetLocation = new Double[]{-1*finalVector[0]*100, -1*finalVector[1]*100};
+            accelerate(targetLocation, fearOfPredators);
             move(worldWidth, worldHeight);
         }
         else {
-            moveRandomly(worldWidth, worldHeight, MAX_ACCELERATION);
+            Double closestDistance = 1000000.0;
+            Double closestFoodXCoord = 1000000.0;
+            Double closestFoodYCoord = 1000000.0;
+            for (Food food : foodList) {
+                Double[] otherLocation = food.getLocation();
+                Double dist = distance(location, otherLocation);
+                if (dist < closestDistance && food.getRadius() < radius) {
+                    closestDistance = dist;
+                    closestFoodXCoord = food.getLocation()[0];
+                    closestFoodYCoord = food.getLocation()[1];
+                }
+            }
+            if (closestDistance < 1000000.0) {
+                // Choose a target location opposite to where the closest Predator is
+                Double[] targetLocation = {closestFoodXCoord * 1, closestFoodYCoord * 1};
+                Double modifier = attractionToFood;
+                accelerate(targetLocation, modifier);
+                move(worldWidth, worldHeight);
+            }
+            else {
+                moveRandomly(worldWidth, worldHeight, MAX_ACCELERATION);
+            }
+
         }
+
     }
 
-    void update(ArrayList<BasicFood> foodList, int worldWidth, int worldHeight) {
-        moveRelativeToClosestFood(foodList, worldWidth, worldHeight);
+    void update(ArrayList<BasicFood> foodList, ArrayList<Predator> predatorList, int worldWidth, int worldHeight) {
+        moveAccordingToSituation(foodList, predatorList, worldWidth, worldHeight);
 
         health -= 1;
     }
