@@ -52,6 +52,10 @@ public class Prey extends Agent {
             }
         }
     }
+    
+    double getFearOfPredator(){
+    	return fearOfPredators;
+    }
 
     void eatAlternate(ArrayList<AlternateFood> alternateFoodList) {
         for (int i = alternateFoodList.size()-1; i >= 0; i--) {

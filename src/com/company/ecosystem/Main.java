@@ -60,6 +60,7 @@ public class Main extends JPanel{
     private ArrayList<String> creatureCountList;
     private ArrayList<String> foodCountList;
     private ArrayList<String> avgRadiusList;
+    private ArrayList<String> fearList;
     private Random ran;
     private int framenr;
 
@@ -134,15 +135,18 @@ public class Main extends JPanel{
         creatureCountList = new ArrayList<>();
         foodCountList = new ArrayList<>();
         avgRadiusList = new ArrayList<>();
+        fearList = new ArrayList<>();
         creatureCountList.add("FRAME NR" + "\t" + "PREYS" + "\t" + "PREDATORS");
         foodCountList.add("FRAME NR" + "\t" + "BASIC FOOD" + "\t" + "ALTERNATE FOOD");
         avgRadiusList.add("FRAME NR" + "\t" + "PREY RADIUS" + "\t" + "PREDATOR RADIUS");
+        fearList.add("FRAME NR" + "\t" + "FEAR OF PREDATORS");
     }
 
     private void deleteExistingLogs(){
         File f = new File("logs/creatureCount.dat");
         File g = new File("logs/foodCount.dat");
         File h = new File("logs/avgRadius.dat");
+        File i = new File("logs/fear.dat");
         if (f.exists() && !f.isDirectory()) {
             f.delete();
         }
@@ -151,6 +155,9 @@ public class Main extends JPanel{
         }
         if (h.exists() && !h.isDirectory()) {
             h.delete();
+        }
+        if (i.exists() && !i.isDirectory()) {
+            i.delete();
         }
     }
 
@@ -345,6 +352,7 @@ public class Main extends JPanel{
         public void run() {
         	double preyAvgRadius = 0;
         	double predatorAvgRadius = 0;
+        	double fear = 0;
             ArrayList<Prey> bornPreyList = new ArrayList<>();
             for (Iterator<Prey> iterator = preyList.iterator() ; iterator.hasNext(); ) {
                 Prey prey = iterator.next();
@@ -361,8 +369,10 @@ public class Main extends JPanel{
                     bornPreyList.add(child);
                 }               
                 preyAvgRadius += prey.getRadius();
+                fear += prey.getFearOfPredator();
             }
             preyAvgRadius = preyAvgRadius/preyList.size();
+            fear += fear / preyList.size();
             preyList.addAll(bornPreyList);
 
             ArrayList<Predator> bornPredatorList = new ArrayList<>();
@@ -397,6 +407,7 @@ public class Main extends JPanel{
             creatureCountList.add(Integer.toString(framenr) + "\t" + Integer.toString(preyList.size()) + "\t" + Integer.toString(predatorList.size()));
             foodCountList.add(Integer.toString(framenr) + "\t" + Integer.toString(basicFoodList.size()) + "\t" + Integer.toString(alternateFoodList.size()));
             avgRadiusList.add(Integer.toString(framenr) + "\t" + Double.toString(preyAvgRadius) + "\t" + Double.toString(predatorAvgRadius));
+            fearList.add(Integer.toString(framenr) + "\t" + Double.toString(fear));
             framenr += 1;
         }
     }
@@ -479,9 +490,11 @@ public class Main extends JPanel{
 			Path creatureFile = Paths.get("logs/creatureCount.dat");
 			Path foodFile = Paths.get("logs/foodCount.dat");
 			Path radiusFile = Paths.get("logs/avgRadius.dat");
+			Path fearFile = Paths.get("logs/fear.dat");
 			File f = new File("logs/creatureCount.dat");
 			File g = new File("logs/foodCount.dat");
 			File h = new File("logs/avgRadius.dat");
+			File i = new File("logs/fear.dat");
 			try {
 				if(f.exists() && !f.isDirectory()){
 					Files.write(creatureFile, creatureCountList, Charset.forName("UTF-8"), StandardOpenOption.APPEND);
@@ -500,6 +513,12 @@ public class Main extends JPanel{
 				}
 				else{
 					Files.write(radiusFile, avgRadiusList, Charset.forName("UTF-8"));
+				}
+				if(i.exists() && !i.isDirectory()){
+					Files.write(fearFile, fearList, Charset.forName("UTF-8"), StandardOpenOption.APPEND);
+				}
+				else{
+					Files.write(fearFile, fearList, Charset.forName("UTF-8"));
 				}
                 initializeLogLists();
 				
