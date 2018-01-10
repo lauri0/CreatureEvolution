@@ -5,9 +5,9 @@ import java.util.Random;
 
 public class Predator extends Agent {
     private static final double STARTING_HEALTH = 250d;
-    private static final double MAX_SPEED = 5.0;
+    private static final double MAX_SPEED = 13.5;
     private static final double MAX_RADIUS = 50.0;
-    private static final double MAX_ACCELERATION = 1.5;
+    private static final double MAX_ACCELERATION = 1;
     //private static final double REPRODUCTION_RATE = 0.0025;
     //private static final double MUTATION_RATE = 0.15;
     private static final int REPRODUCTION_HEALTH_THRESHOLD = 50;

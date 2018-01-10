@@ -7,7 +7,7 @@ public class Prey extends Agent {
     private static final double MAX_SPEED = 10.0;
     private static final double MAX_RADIUS = 50.0;
     private static final int PREDATOR_ALERT_RANGE = 100;
-    private static final double MAX_ACCELERATION = 2;
+    private static final double MAX_ACCELERATION = 1.5;
     //private static final double REPRODUCTION_RATE = 0.004;
     //private static final double MUTATION_RATE = 0.15;
     private static final int REPRODUCTION_HEALTH_THRESHOLD = 50;
