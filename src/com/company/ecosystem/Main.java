@@ -59,6 +59,7 @@ public class Main extends JPanel{
     private ArrayList<Predator> predatorList;
     private ArrayList<String> creatureCountList;
     private ArrayList<String> foodCountList;
+    private ArrayList<String> avgRadiusList;
     private Random ran;
     private int framenr;
 
@@ -132,18 +133,24 @@ public class Main extends JPanel{
     private void initializeLogLists(){
         creatureCountList = new ArrayList<>();
         foodCountList = new ArrayList<>();
+        avgRadiusList = new ArrayList<>();
         creatureCountList.add("FRAME NR" + "\t" + "PREYS" + "\t" + "PREDATORS");
         foodCountList.add("FRAME NR" + "\t" + "BASIC FOOD" + "\t" + "ALTERNATE FOOD");
+        avgRadiusList.add("FRAME NR" + "\t" + "PREY RADIUS" + "\t" + "PREDATOR RADIUS");
     }
 
     private void deleteExistingLogs(){
         File f = new File("logs/creatureCount.dat");
         File g = new File("logs/foodCount.dat");
+        File h = new File("logs/avgRadius.dat");
         if (f.exists() && !f.isDirectory()) {
             f.delete();
         }
         if (g.exists() && !g.isDirectory()) {
             g.delete();
+        }
+        if (h.exists() && !h.isDirectory()) {
+            h.delete();
         }
     }
 
@@ -336,6 +343,8 @@ public class Main extends JPanel{
     private class AnimationUpdater extends TimerTask {
         @Override
         public void run() {
+        	double preyAvgRadius = 0;
+        	double predatorAvgRadius = 0;
             ArrayList<Prey> bornPreyList = new ArrayList<>();
             for (Iterator<Prey> iterator = preyList.iterator() ; iterator.hasNext(); ) {
                 Prey prey = iterator.next();
@@ -350,8 +359,10 @@ public class Main extends JPanel{
                 Prey child = prey.reproduce(currentPreyReproductionRate, currentPreyMutationRate);
                 if (child != null) {
                     bornPreyList.add(child);
-                }
+                }               
+                preyAvgRadius += prey.getRadius();
             }
+            preyAvgRadius = preyAvgRadius/preyList.size();
             preyList.addAll(bornPreyList);
 
             ArrayList<Predator> bornPredatorList = new ArrayList<>();
@@ -368,7 +379,9 @@ public class Main extends JPanel{
                 if (child != null) {
                     bornPredatorList.add(child);
                 }
+                predatorAvgRadius += predator.getRadius();
             }
+            predatorAvgRadius = predatorAvgRadius/predatorList.size();
             predatorList.addAll(bornPredatorList);
 
             double randomDouble = ran.nextDouble();
@@ -383,6 +396,7 @@ public class Main extends JPanel{
             repaint();
             creatureCountList.add(Integer.toString(framenr) + "\t" + Integer.toString(preyList.size()) + "\t" + Integer.toString(predatorList.size()));
             foodCountList.add(Integer.toString(framenr) + "\t" + Integer.toString(basicFoodList.size()) + "\t" + Integer.toString(alternateFoodList.size()));
+            avgRadiusList.add(Integer.toString(framenr) + "\t" + Double.toString(preyAvgRadius) + "\t" + Double.toString(predatorAvgRadius));
             framenr += 1;
         }
     }
@@ -464,8 +478,10 @@ public class Main extends JPanel{
             else if(e.getActionCommand().equals(LOG_ACTION_COMMAND)){
 			Path creatureFile = Paths.get("logs/creatureCount.dat");
 			Path foodFile = Paths.get("logs/foodCount.dat");
+			Path radiusFile = Paths.get("logs/avgRadius.dat");
 			File f = new File("logs/creatureCount.dat");
 			File g = new File("logs/foodCount.dat");
+			File h = new File("logs/avgRadius.dat");
 			try {
 				if(f.exists() && !f.isDirectory()){
 					Files.write(creatureFile, creatureCountList, Charset.forName("UTF-8"), StandardOpenOption.APPEND);
@@ -477,8 +493,13 @@ public class Main extends JPanel{
 					Files.write(foodFile, foodCountList, Charset.forName("UTF-8"), StandardOpenOption.APPEND);
 				}
 				else{
-
 					Files.write(foodFile, foodCountList, Charset.forName("UTF-8"));
+				}
+				if(h.exists() && !h.isDirectory()){
+					Files.write(radiusFile, avgRadiusList, Charset.forName("UTF-8"), StandardOpenOption.APPEND);
+				}
+				else{
+					Files.write(radiusFile, avgRadiusList, Charset.forName("UTF-8"));
 				}
                 initializeLogLists();
 				
