@@ -108,8 +108,6 @@ public class Main extends JPanel{
         basicFoodList = new ArrayList<>();
         alternateFoodList = new ArrayList<>();
         predatorList = new ArrayList<>();
-        creatureCountList = new ArrayList<>();
-        foodCountList = new ArrayList<>();
         framenr = 0;
 
         currentBasicFoodSpawnRate = BASIC_FOOD_SPAWN_RATE;
@@ -123,13 +121,31 @@ public class Main extends JPanel{
         initializePrey();
         initializePredators();
         initializeControlPanel();
+        deleteExistingLogs();
+        initializeLogLists();
 
         animationTimer = new Timer();
         animationTask = new AnimationUpdater();
         updateTask = new InfoUpdater();
     }
 
+    private void initializeLogLists(){
+        creatureCountList = new ArrayList<>();
+        foodCountList = new ArrayList<>();
+        creatureCountList.add("FRAME NR" + "\t" + "PREYS" + "\t" + "PREDATORS");
+        foodCountList.add("FRAME NR" + "\t" + "BASIC FOOD" + "\t" + "ALTERNATE FOOD");
+    }
 
+    private void deleteExistingLogs(){
+        File f = new File("logs/creatureCount.dat");
+        File g = new File("logs/foodCount.dat");
+        if (f.exists() && !f.isDirectory()) {
+            f.delete();
+        }
+        if (g.exists() && !g.isDirectory()) {
+            g.delete();
+        }
+    }
 
     private void initializeFood() {
         for (int i = 0; i < STARTING_BASIC_FOOD_COUNT; i++) {
@@ -238,7 +254,7 @@ public class Main extends JPanel{
         restartButton = new JButton("Restart simulation");
         restartButton.setActionCommand(RESTART_SIMULATION_ACTION_COMMAND);
         restartButton.addActionListener(listener);
-        creatureCountButton = new JButton("Log creature count");
+        creatureCountButton = new JButton("Create logs");
         creatureCountButton.setActionCommand(LOG_ACTION_COMMAND);
         creatureCountButton.addActionListener(listener);
 
@@ -437,10 +453,13 @@ public class Main extends JPanel{
                 predatorList.clear();
                 preyList.clear();
                 basicFoodList.clear();
-                alternateFoodList.clear();
+                foodCountList.clear();
+                framenr = 0;
                 initializeFood();
                 initializePredators();
                 initializePrey();
+                deleteExistingLogs();
+                initializeLogLists();
             }
             else if(e.getActionCommand().equals(LOG_ACTION_COMMAND)){
 			Path creatureFile = Paths.get("logs/creatureCount.dat");
@@ -458,15 +477,14 @@ public class Main extends JPanel{
 					Files.write(foodFile, foodCountList, Charset.forName("UTF-8"), StandardOpenOption.APPEND);
 				}
 				else{
+
 					Files.write(foodFile, foodCountList, Charset.forName("UTF-8"));
 				}
-				
-				creatureCountList = new ArrayList<>();
-				foodCountList = new ArrayList<>();
+                initializeLogLists();
 				
 			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
+                e1.printStackTrace();
+            }
 		            
 
             	
