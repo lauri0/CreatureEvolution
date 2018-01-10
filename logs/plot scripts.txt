@@ -1,0 +1,3 @@
+plot "creatureCount.dat" using 1:2 title "prey" w lines, "creatureCount.dat" using 1:3 title "predator" w lines
+plot "foodCount.dat" using 1:2 title "basic" w lines, "foodCount.dat" using 1:3 title "alternative" w lines
+plot "avgRadius.dat" using 1:2 title "prey radius" w lines, "avgRadius.dat" using 1:3 title "predator radius" w lines

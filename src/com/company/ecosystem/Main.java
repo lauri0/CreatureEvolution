@@ -372,7 +372,7 @@ public class Main extends JPanel{
                 fear += prey.getFearOfPredator();
             }
             preyAvgRadius = preyAvgRadius/preyList.size();
-            fear += fear / preyList.size();
+            fear = (fear / preyList.size())*10;
             preyList.addAll(bornPreyList);
 
             ArrayList<Predator> bornPredatorList = new ArrayList<>();
